@@ -77,32 +77,14 @@ class ReservationController extends Controller
         $reservation->statut = 'confirme';
         $reservation->save();
         
-        // Envoi de l'email au client
+        // Envoi de l'email au client (avec template Blade)
         try {
             $client = $reservation->client;
-            $voyage = $reservation->voyage;
             
-            $sujet = "Votre réservation est confirmée - Gestion Portuaire";
+            $sujet = "✅ Votre réservation n°{$reservation->id} est confirmée - KivuPort";
             
-            $contenu = "
-                <html>
-                <head><title>Confirmation de réservation</title></head>
-                <body>
-                    <h1>Bonjour {$client->prenom} {$client->nom}</h1>
-                    <p>Votre réservation <strong>n°{$reservation->id}</strong> a été confirmée par notre équipe.</p>
-                    <p><strong>Détails du voyage :</strong><br>
-                    - Code voyage : {$voyage->code_voyage}<br>
-                    - Type : {$reservation->type_reservation}<br>
-                    - Date d'embarquement : {$reservation->date_embarquement}<br>
-                    - Prix total : {$reservation->prix_total} €
-                    </p>
-                    <p>Veuillez procéder au paiement pour finaliser votre réservation.</p>
-                    <p>Merci de votre confiance.</p>
-                    <hr>
-                    <small>Gestion Portuaire - Votre partenaire maritime</small>
-                </body>
-                </html>
-            ";
+            // Utilisation du template Blade
+            $contenu = view('emails.reservation-confirmation', ['reservation' => $reservation])->render();
             
             \App\Services\BrevoEmailService::send($client->email, $sujet, $contenu);
             

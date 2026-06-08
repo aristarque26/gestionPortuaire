@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Reservation;
 use App\Models\Voyage;
 use App\Models\Pavillon;
+use App\Models\Paiement;
 use App\Services\BrevoEmailService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
@@ -126,5 +127,55 @@ class ReservationController extends Controller
 
         return redirect()->route('client.reservations.index')
             ->with('success', 'Réservation annulée avec succès.');
+    }
+
+    // 🔥 PAGE DE PAIEMENT (Affiche le formulaire)
+    public function pagePaiement($id)
+    {
+        $client = Auth::user()->client;
+        $reservation = Reservation::where('idclient', $client->id)
+                        ->where('statut', 'confirme')
+                        ->findOrFail($id);
+        
+        return view('client.paiement.index', compact('reservation'));
+    }
+
+    // 🔥 EFFECTUER LE PAIEMENT (Simulation Maisha Pay)
+    public function effectuerPaiement($id)
+    {
+        $client = Auth::user()->client;
+        $reservation = Reservation::where('idclient', $client->id)
+                        ->where('statut', 'confirme')
+                        ->findOrFail($id);
+        
+        // ======================================================
+        // SIMULATION MAISHA PAY
+        // En production, remplacer ce bloc par un appel API réel
+        // ======================================================
+        
+        // Création de l'enregistrement dans la table paiements
+        $paiement = Paiement::create([
+            'idreservation'  => $reservation->id,
+            'montant'        => $reservation->prix_total,
+            'devise'         => 'FC',
+            'mode_paiement'  => 'MAISHA_PAY',
+            'date_paiement'  => now(),
+            'statut'         => 'paye'
+        ]);
+        
+        // Mise à jour du statut de la réservation
+        $reservation->statut = 'paye';
+        $reservation->save();
+        
+        // Envoi de l'email de confirmation de paiement (Email 2)
+        try {
+            $contenu = view('emails.paiement-confirmation', ['reservation' => $reservation])->render();
+            BrevoEmailService::send($client->email, 'Paiement reçu - KivuPort', $contenu);
+        } catch (\Exception $e) {
+            \Log::error('Erreur envoi email paiement: ' . $e->getMessage());
+        }
+        
+        return redirect()->route('client.reservations.index')
+            ->with('success', 'Paiement effectué avec succès via Maisha Pay !');
     }
 }

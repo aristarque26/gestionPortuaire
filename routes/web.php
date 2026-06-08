@@ -168,6 +168,11 @@ Route::middleware('auth')->group(function () {
         Route::get('/dashboard', [ClientDashboardController::class, 'index'])->name('dashboard');
         Route::get('/voyages', [ClientVoyageController::class, 'index'])->name('voyages.index');
         Route::resource('reservations', ClientReservationController::class);
+        
+        // 🔥 ROUTES DE PAIEMENT AJOUTÉES ICI 🔥
+        Route::get('reservation/{id}/paiement', [ClientReservationController::class, 'pagePaiement'])->name('client.reservation.paiement');
+        Route::post('reservation/{id}/paiement/effectuer', [ClientReservationController::class, 'effectuerPaiement'])->name('client.reservation.effectuer.paiement');
+        
         Route::resource('paiements', ClientPaiementController::class);
         Route::get('/profil', [ProfilController::class, 'show'])->name('profil.show');
         Route::get('/profil/edit', [ProfilController::class, 'edit'])->name('profil.edit');
