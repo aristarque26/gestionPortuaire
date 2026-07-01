@@ -12,7 +12,8 @@ class DashboardController extends Controller
 {
     public function index()
     {
-        $client = Auth::user()->client;
+        $user = Auth::user();
+        $client = $user->client;
         
         $totalReservations = Reservation::where('idclient', $client->id)->count();
         $voyagesAVenir = Reservation::where('idclient', $client->id)
@@ -29,6 +30,6 @@ class DashboardController extends Controller
             ->take(5)
             ->get();
         
-        return view('client.dashboard', compact('totalReservations', 'voyagesAVenir', 'totalPaiements', 'dernieresReservations'));
+        return view('client.dashboard', compact('user', 'totalReservations', 'voyagesAVenir', 'totalPaiements', 'dernieresReservations'));
     }
 }

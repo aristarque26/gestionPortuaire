@@ -37,7 +37,7 @@ class RegisteredUserController extends Controller
             'telephone' => ['required', 'string', 'max:20'],
             'photo' => ['nullable', 'image', 'mimes:jpeg,png,jpg', 'max:2048'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
-            'password' => ['required', 'confirmed', Rules\Password::defaults()],
+            'password' => ['required', Rules\Password::defaults()],
         ]);
 
         // Gestion de la photo
@@ -64,10 +64,10 @@ class RegisteredUserController extends Controller
             'prenom' => $user->prenom,
             'email' => $user->email,
             'telephone' => $user->telephone,
-            'adresse' => null,
-            'nationalite' => null,
-            'genre' => null,
-            'photo' => null,
+            'adresse' => 'Non renseignée',
+            'nationalite' => 'Non renseignée',
+            'genre' => 'Homme',
+            'photo' => $photoPath,
             'date_inscription' => now(),
             'statut' => 'actif',
             'idutilisateur' => $user->id
