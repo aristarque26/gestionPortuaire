@@ -60,6 +60,15 @@ class DashboardController extends Controller
         $pavillonLabels = $recettesParPavillon->pluck('nom');
         $recettesData = $recettesParPavillon->pluck('total');
 
+        // Recettes mensuelles
+        $recettesMois = DB::table('paiements')
+            ->selectRaw('DATE_FORMAT(date_paiement, "%Y-%m") as mois, SUM(montant) as total')
+            ->whereYear('date_paiement', $annee)
+            ->groupBy('mois')
+            ->orderBy('mois')
+            ->pluck('total', 'mois')
+            ->toArray();
+
         // Occupation des bateaux
         $bateaux = Bateau::all();
         $occupationLabels = [];

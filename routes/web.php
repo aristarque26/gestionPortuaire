@@ -104,6 +104,9 @@ Route::middleware('auth')->group(function () {
         Route::get('/export-reservations', function () {
             return Excel::download(new ReservationsExport, 'reservations.xlsx');
         })->name('export.reservations');
+        Route::get('/export', function () {
+            return Excel::download(new ReservationsExport, 'reservations.xlsx');
+        })->name('export');
         
         // Tables associatives
         Route::prefix('conceder')->name('conceder.')->group(function () {
