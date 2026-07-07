@@ -9,7 +9,7 @@
     <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
         <div class="bg-white rounded-lg shadow p-4 border-l-4 border-blue-500">
             <p class="text-sm text-gray-500">Total</p>
-            <p class="text-2xl font-bold text-gray-800">{{ $reservations->total() }}</p>
+            <p class="text-2xl font-bold text-gray-800">{{ $reservations->count() }}</p>
         </div>
         <div class="bg-white rounded-lg shadow p-4 border-l-4 border-green-500">
             <p class="text-sm text-gray-500">Confirmées</p>
@@ -66,7 +66,7 @@
 
     {{-- Liste des réservations --}}
     <div class="bg-white rounded-xl shadow-md overflow-hidden">
-        {{-- Vue desktop : tableau --}}
+        {{-- Vue desktop --}}
         <div class="hidden md:block overflow-x-auto">
             <table class="min-w-full divide-y divide-gray-200">
                 <thead class="bg-gray-50">
@@ -123,7 +123,7 @@
             </table>
         </div>
 
-        {{-- Vue mobile : cartes --}}
+        {{-- Vue mobile --}}
         <div class="md:hidden divide-y divide-gray-200">
             @forelse($reservations as $reservation)
             <div class="p-4 hover:bg-gray-50 transition">
@@ -176,7 +176,7 @@
     </div>
 </div>
 
-{{-- Petit script pour auto-soumettre le formulaire au changement (optionnel) --}}
+{{-- Script pour auto-soumettre le formulaire --}}
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         const filterForm = document.getElementById('filterForm');
@@ -186,7 +186,6 @@
                 filterForm.submit();
             });
         });
-        // Pour la recherche, on soumet après un délai (type debounce)
         const searchInput = document.getElementById('search');
         let timeout = null;
         searchInput.addEventListener('input', function() {

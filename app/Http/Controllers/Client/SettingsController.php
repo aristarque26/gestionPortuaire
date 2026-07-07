@@ -6,13 +6,46 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use App\Models\Reservation;
+use App\Models\Paiement;
 
 class SettingsController extends Controller
 {
     // Page d'accueil des paramètres client
     public function index()
     {
-        return view('client.settings.index');
+        $user = Auth::user();
+        $client = $user->client;
+
+        // Statistiques des réservations
+        $totalReservations = Reservation::where('idclient', $client->id)->count();
+        $reservationsConfirmees = Reservation::where('idclient', $client->id)
+                                ->where('statut', 'confirme')->count();
+        $reservationsEnAttente = Reservation::where('idclient', $client->id)
+                                ->where('statut', 'en_attente')->count();
+
+        // Statistiques des paiements
+        $totalPaiements = Paiement::whereHas('reservation', function($q) use ($client) {
+            $q->where('idclient', $client->id);
+        })->count();
+
+        // Dernières réservations et paiements
+        $dernieresReservations = Reservation::where('idclient', $client->id)
+                                ->latest()->take(5)->get();
+        $derniersPaiements = Paiement::whereHas('reservation', function($q) use ($client) {
+            $q->where('idclient', $client->id);
+        })->latest()->take(5)->get();
+
+        return view('client.settings.index', compact(
+            'user', 
+            'client', 
+            'totalReservations', 
+            'reservationsConfirmees', 
+            'reservationsEnAttente',
+            'totalPaiements',
+            'dernieresReservations',
+            'derniersPaiements'
+        ));
     }
 
     // Modifier le profil
@@ -80,5 +113,35 @@ class SettingsController extends Controller
         session(['client_theme' => $request->theme]);
 
         return redirect()->route('client.settings.theme')->with('success', 'Thème mis à jour avec succès.');
+    }
+
+    // 🔐 Page de changement de mot de passe
+    public function password()
+    {
+        return view('client.settings.password');
+    }
+
+    // 🔐 Mettre à jour le mot de passe
+    public function updatePassword(Request $request)
+    {
+        $request->validate([
+            'current_password' => 'required',
+            'password' => 'required|confirmed|min:8',
+        ]);
+
+        $user = Auth::user();
+
+        // Vérifier l'ancien mot de passe
+        if (!Hash::check($request->current_password, $user->password)) {
+            return back()->withErrors(['current_password' => 'Le mot de passe actuel est incorrect.']);
+        }
+
+        // Mettre à jour le mot de passe
+        $user->update([
+            'password' => Hash::make($request->password),
+        ]);
+
+        return redirect()->route('settings.password')
+            ->with('success', 'Mot de passe mis à jour avec succès.');
     }
 }

@@ -23,7 +23,7 @@
                         </a>
                     </li>
                     <li>
-                        <a href="{{ route('client.settings.password') }}" class="flex items-center px-3 py-2 rounded-lg hover:bg-gray-50 text-gray-700 transition">
+                        <a href="{{ route('settings.password') }}" class="flex items-center px-3 py-2 rounded-lg hover:bg-gray-50 text-gray-700 transition">
                             <i class="fas fa-lock w-5 mr-2"></i> Sécurité
                         </a>
                     </li>
@@ -89,7 +89,7 @@
                     </div>
                     <i class="fas fa-chevron-right text-gray-400 group-hover:text-blue-500 transition"></i>
                 </a>
-                <a href="{{ route('client.settings.password') }}" class="bg-white rounded-xl shadow-md p-6 hover:shadow-lg transition flex items-center justify-between group">
+                <a href="{{ route('settings.password') }}" class="bg-white rounded-xl shadow-md p-6 hover:shadow-lg transition flex items-center justify-between group">
                     <div>
                         <i class="fas fa-lock text-3xl text-blue-500 group-hover:text-blue-600"></i>
                         <h3 class="text-lg font-semibold text-gray-800 mt-2">Sécurité</h3>

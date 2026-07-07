@@ -187,6 +187,10 @@ Route::middleware('auth')->group(function () {
         Route::post('/settings/profile', [ClientSettingsController::class, 'updateProfile'])->name('settings.update.profile');
         Route::get('/settings/theme', [ClientSettingsController::class, 'theme'])->name('settings.theme');
         Route::post('/settings/theme', [ClientSettingsController::class, 'updateTheme'])->name('settings.update.theme');
+        
+        // ✅ AJOUT : Routes pour la gestion du mot de passe (CORRIGÉES)
+        Route::get('/settings/password', [ClientSettingsController::class, 'password'])->name('settings.password');
+        Route::post('/settings/password', [ClientSettingsController::class, 'updatePassword'])->name('settings.update.password');
     });
 });
 

@@ -19,7 +19,7 @@ class ReservationController extends Controller
         $reservations = Reservation::where('idclient', $client->id)
             ->with('voyage', 'pavillon')
             ->latest()
-            ->get();
+            ->paginate(10); // ✅ CHANGEMENT : pagination au lieu de get()
         
         return view('client.reservations.index', compact('reservations'));
     }

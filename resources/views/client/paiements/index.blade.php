@@ -11,7 +11,7 @@
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
             @php
                 $statsCards = [
-                    ['label' => 'Total', 'value' => $paiements->total(), 'icon' => 'list', 'gradient' => 'from-blue-500 to-indigo-600', 'bg' => 'bg-blue-50', 'text' => 'text-blue-600'],
+                    ['label' => 'Total', 'value' => $paiements->count(), 'icon' => 'list', 'gradient' => 'from-blue-500 to-indigo-600', 'bg' => 'bg-blue-50', 'text' => 'text-blue-600'],
                     ['label' => 'Payé', 'value' => $paiements->where('statut', 'paye')->count(), 'icon' => 'check-circle', 'gradient' => 'from-emerald-500 to-green-600', 'bg' => 'bg-emerald-50', 'text' => 'text-emerald-600'],
                     ['label' => 'En attente', 'value' => $paiements->where('statut', 'en_attente')->count(), 'icon' => 'hourglass-half', 'gradient' => 'from-amber-500 to-orange-600', 'bg' => 'bg-amber-50', 'text' => 'text-amber-600'],
                     ['label' => 'Échoué', 'value' => $paiements->where('statut', 'echoue')->count(), 'icon' => 'times-circle', 'gradient' => 'from-red-500 to-pink-600', 'bg' => 'bg-red-50', 'text' => 'text-red-600'],
@@ -104,14 +104,14 @@
         {{-- Liste des paiements --}}
         <div class="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-100">
             {{-- Header avec compteur --}}
-            @if($paiements->total() > 0)
+            @if($paiements->count() > 0)
             <div class="px-6 py-4 bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-gray-200 flex items-center justify-between">
                 <div class="flex items-center gap-3">
                     <div class="w-8 h-8 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center">
                         <i class="fas fa-list text-white text-sm"></i>
                     </div>
                     <p class="text-sm font-semibold text-gray-700">
-                        <span class="text-blue-600 font-bold">{{ $paiements->total() }}</span> paiement(s) trouvé(s)
+                        <span class="text-blue-600 font-bold">{{ $paiements->count() }}</span> paiement(s) trouvé(s)
                     </p>
                 </div>
             </div>
