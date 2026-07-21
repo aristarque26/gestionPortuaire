@@ -4,6 +4,19 @@
 @section('header', 'Gestion des Pavillons')
 
 @section('content')
+{{-- MESSAGES FLASH --}}
+@if(session('success'))
+    <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
+        {{ session('success') }}
+    </div>
+@endif
+
+@if(session('error'))
+    <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+        {{ session('error') }}
+    </div>
+@endif
+
 <div class="mb-4">
     <a href="{{ route('admin.pavillons.create') }}" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg">+ Ajouter un pavillon</a>
 </div>
@@ -28,7 +41,13 @@
                 <td class="px-6 py-4">{{ $pavillon->classe }}</td>
                 <td class="px-6 py-4">{{ $pavillon->capacite_max }}</td>
                 <td class="px-6 py-4">{{ $pavillon->unite }}</td>
-                <td class="px-6 py-4">{{ number_format($pavillon->prix_unitaire, 0, ',', ' ') }} FCFA</td>
+                <td class="px-6 py-4">
+                    @if($pavillon->prix_unitaire > 0)
+                        {{ number_format($pavillon->prix_unitaire, 0, ',', ' ') }} FCFA
+                    @else
+                        <span class="text-gray-400">N/A</span>
+                    @endif
+                </td>
                 <td class="px-6 py-4">{{ $pavillon->bateau->nom ?? 'N/A' }}</td>
                 <td class="px-6 py-4">
                     <a href="{{ route('admin.pavillons.show', $pavillon->id) }}" class="text-blue-600 hover:text-blue-900 mr-3">Voir</a>

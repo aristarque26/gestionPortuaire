@@ -25,17 +25,53 @@ class PavillonController extends Controller
     {
         $request->validate([
             'nom' => 'required|string|max:255',
-            'capacite_max' => 'required|integer',
+            'capacite_max' => 'required|integer|min:1',
             'classe' => 'required|string|max:255',
             'unite' => 'required|string|max:255',
-            'prix_unitaire' => 'required|numeric|min:0',  // ✅ AJOUTÉ
-            'idbateau' => 'required|exists:bateaux,id'
+            'prix_unitaire' => 'nullable|numeric|min:0',
+            'prix_tonne' => 'nullable|numeric|min:0',
+            'devise' => 'required|in:FC,USD',
+            'idbateau' => 'required|exists:bateaux,id',
         ]);
 
+        $bateau = Bateau::findOrFail($request->idbateau);
+        $capacite = $request->capacite_max;
+
+        // 🔥 VÉRIFICATION PASSAGER (si prix_unitaire > 0)
+        if ($request->prix_unitaire > 0) {
+            $capacitePassagerExistante = Pavillon::where('idbateau', $bateau->id)
+                ->where('prix_unitaire', '>', 0)
+                ->sum('capacite_max');
+
+            $totalPassager = $capacitePassagerExistante + $capacite;
+
+            if ($totalPassager > $bateau->capacite_passager) {
+                return back()
+                    ->withInput()
+                    ->with('error', '❌ La capacité totale des pavillons passagers (' . $totalPassager . ') dépasse la capacité maximale du bateau pour les passagers (' . $bateau->capacite_passager . ' places).');
+            }
+        }
+
+        // 🔥 VÉRIFICATION CARGAISON (si prix_tonne > 0)
+        if ($request->prix_tonne > 0) {
+            $capaciteCargaisonExistante = Pavillon::where('idbateau', $bateau->id)
+                ->where('prix_tonne', '>', 0)
+                ->sum('capacite_max');
+
+            $totalCargaison = $capaciteCargaisonExistante + $capacite;
+
+            if ($totalCargaison > $bateau->capacite_cargaison) {
+                return back()
+                    ->withInput()
+                    ->with('error', '❌ La capacité totale des pavillons cargaison (' . $totalCargaison . ') dépasse la capacité maximale du bateau pour la cargaison (' . $bateau->capacite_cargaison . ' tonnes).');
+            }
+        }
+
+        // Enregistrement
         Pavillon::create($request->all());
 
         return redirect()->route('admin.pavillons.index')
-            ->with('success', 'Pavillon créé avec succès.');
+            ->with('success', 'Pavillon ajouté avec succès.');
     }
 
     public function show($id)
@@ -57,13 +93,51 @@ class PavillonController extends Controller
 
         $request->validate([
             'nom' => 'required|string|max:255',
-            'capacite_max' => 'required|integer',
+            'capacite_max' => 'required|integer|min:1',
             'classe' => 'required|string|max:255',
             'unite' => 'required|string|max:255',
-            'prix_unitaire' => 'required|numeric|min:0',  // ✅ AJOUTÉ
-            'idbateau' => 'required|exists:bateaux,id'
+            'prix_unitaire' => 'nullable|numeric|min:0',
+            'prix_tonne' => 'nullable|numeric|min:0',
+            'devise' => 'required|in:FC,USD',
+            'idbateau' => 'required|exists:bateaux,id',
         ]);
 
+        $bateau = Bateau::findOrFail($request->idbateau);
+        $capacite = $request->capacite_max;
+
+        // 🔥 VÉRIFICATION PASSAGER (modification)
+        if ($request->prix_unitaire > 0) {
+            $capacitePassagerExistante = Pavillon::where('idbateau', $bateau->id)
+                ->where('prix_unitaire', '>', 0)
+                ->where('id', '!=', $id)
+                ->sum('capacite_max');
+
+            $totalPassager = $capacitePassagerExistante + $capacite;
+
+            if ($totalPassager > $bateau->capacite_passager) {
+                return back()
+                    ->withInput()
+                    ->with('error', '❌ La capacité totale des pavillons passagers (' . $totalPassager . ') dépasse la capacité maximale du bateau pour les passagers (' . $bateau->capacite_passager . ' places).');
+            }
+        }
+
+        // 🔥 VÉRIFICATION CARGAISON (modification)
+        if ($request->prix_tonne > 0) {
+            $capaciteCargaisonExistante = Pavillon::where('idbateau', $bateau->id)
+                ->where('prix_tonne', '>', 0)
+                ->where('id', '!=', $id)
+                ->sum('capacite_max');
+
+            $totalCargaison = $capaciteCargaisonExistante + $capacite;
+
+            if ($totalCargaison > $bateau->capacite_cargaison) {
+                return back()
+                    ->withInput()
+                    ->with('error', '❌ La capacité totale des pavillons cargaison (' . $totalCargaison . ') dépasse la capacité maximale du bateau pour la cargaison (' . $bateau->capacite_cargaison . ' tonnes).');
+            }
+        }
+
+        // Mise à jour
         $pavillon->update($request->all());
 
         return redirect()->route('admin.pavillons.index')
