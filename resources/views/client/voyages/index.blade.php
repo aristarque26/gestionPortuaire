@@ -9,7 +9,7 @@
     <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
         <div class="bg-white rounded-xl shadow-md p-4 border-l-4 border-blue-500">
             <p class="text-sm text-gray-500">Voyages disponibles</p>
-            <p class="text-2xl font-bold text-gray-800">{{ $voyages->count() }}</p>
+            <p class="text-2xl font-bold text-gray-800">{{ $voyages->total() }}</p>
         </div>
         @php
             $dates = $voyages->pluck('date_depart')->filter();
@@ -204,7 +204,6 @@
             });
         });
 
-        // Pour la recherche textuelle, on utilise un délai (debounce)
         const searchInput = document.getElementById('search');
         searchInput.addEventListener('input', function() {
             clearTimeout(timeout);

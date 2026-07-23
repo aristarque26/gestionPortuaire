@@ -170,6 +170,10 @@ Route::middleware('auth')->group(function () {
     Route::middleware('role:personnel')->prefix('client')->name('client.')->group(function () {
         Route::get('/dashboard', [ClientDashboardController::class, 'index'])->name('dashboard');
         Route::get('/voyages', [ClientVoyageController::class, 'index'])->name('voyages.index');
+        
+        // ✅ AJOUT : Route pour voir le détail d'un voyage
+        Route::get('/voyages/{id}', [ClientVoyageController::class, 'show'])->name('client.voyages.show');
+        
         Route::resource('reservations', ClientReservationController::class);
         
         // 🔥 ROUTES DE PAIEMENT AJOUTÉES ICI 🔥

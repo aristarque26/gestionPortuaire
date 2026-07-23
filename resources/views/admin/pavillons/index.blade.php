@@ -29,7 +29,8 @@
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Classe</th>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Capacité max</th>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Unité</th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Prix unitaire</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Prix / Tarif</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Type</th>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Bateau</th>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
             </tr>
@@ -43,9 +44,20 @@
                 <td class="px-6 py-4">{{ $pavillon->unite }}</td>
                 <td class="px-6 py-4">
                     @if($pavillon->prix_unitaire > 0)
-                        {{ number_format($pavillon->prix_unitaire, 0, ',', ' ') }} FCFA
+                        {{ number_format($pavillon->prix_unitaire, 0, ',', ' ') }} FCFA / place
+                    @elseif($pavillon->prix_tonne > 0)
+                        {{ number_format($pavillon->prix_tonne, 0, ',', ' ') }} FCFA / tonne
                     @else
                         <span class="text-gray-400">N/A</span>
+                    @endif
+                </td>
+                <td class="px-6 py-4">
+                    @if($pavillon->prix_unitaire > 0)
+                        <span class="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">Passager</span>
+                    @elseif($pavillon->prix_tonne > 0)
+                        <span class="px-2 py-1 bg-orange-100 text-orange-800 text-xs rounded-full">Cargaison</span>
+                    @else
+                        <span class="px-2 py-1 bg-gray-100 text-gray-800 text-xs rounded-full">Mixte</span>
                     @endif
                 </td>
                 <td class="px-6 py-4">{{ $pavillon->bateau->nom ?? 'N/A' }}</td>
