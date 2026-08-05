@@ -23,7 +23,7 @@
                 </div>
             @endif
 
-            <form action="{{ route('settings.update.password') }}" method="POST">
+            <form action="/client/settings/password" method="POST">
                 @csrf
 
                 <div class="mb-4">

@@ -44,7 +44,7 @@
                         <label class="block text-sm font-medium text-gray-500">Code voyage</label>
                         <p class="text-gray-900 font-medium">
                             {{ $reservation->voyage->code_voyage ?? 'N/A' }}
-                            <a href="{{ route('client.voyages.show', $reservation->voyage->id) }}" class="text-blue-600 hover:underline ml-2 text-sm">
+                            <a href="/client/voyages/{{ $reservation->voyage->id }}" class="text-blue-600 hover:underline ml-2 text-sm">
                                 <i class="fas fa-external-link-alt"></i>
                             </a>
                         </p>
@@ -177,7 +177,6 @@
                     } elseif ($reservation->type_reservation == 'cargaison') {
                         $prixUnitaire = $reservation->pavillon->prix_tonne ?? 0;
                     } else {
-                        // mixte : on additionne les deux (à adapter selon la logique métier)
                         $prixUnitaire = ($reservation->pavillon->prix_unitaire ?? 0) + ($reservation->pavillon->prix_tonne ?? 0) * ($reservation->poids_cargaison ?? 0);
                     }
                 @endphp
@@ -205,7 +204,7 @@
                 <p class="text-blue-800 text-sm">
                     <i class="fas fa-location-dot mr-1"></i> Accueil principal du port de 
                     {{ $reservation->voyage->trajets->first()->ports->first()->ville ?? 'N/A' }}
-                    (bâtiment administratif)
+                    (bâtiment administrativ
                 </p>
                 <h4 class="font-semibold text-blue-800 mt-4 mb-2"><i class="fas fa-route mr-2"></i>Itinéraire conseillé</h4>
                 <ol class="text-sm text-blue-800 list-decimal list-inside space-y-1">

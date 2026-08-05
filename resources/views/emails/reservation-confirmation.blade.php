@@ -35,7 +35,7 @@
             </div>
             
             <p style="text-align: center; font-size: 18px; font-weight: bold;">
-                ⚠️ Pour finaliser votre réservation, veuillez procéder au paiement.
+                Pour finaliser votre réservation, veuillez procéder au paiement.
             </p>
             
             <p style="text-align: center;">
