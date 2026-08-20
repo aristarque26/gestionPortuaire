@@ -67,7 +67,10 @@ class ConcederController extends Controller
             'role_port' => 'required|string|max:255'
         ]);
 
-        $conceder->update($request->only(['ordre_etape', 'role_port']));
+        // ✅ MODIFICATION : mise à jour manuelle pour éviter le problème de clé composite
+        $conceder->ordre_etape = $request->ordre_etape;
+        $conceder->role_port = $request->role_port;
+        $conceder->save();
 
         return redirect()->route('admin.conceder.index')
             ->with('success', 'Liaison port-trajet modifiée avec succès.');

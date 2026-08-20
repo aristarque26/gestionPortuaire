@@ -39,7 +39,7 @@
             </p>
             
             <p style="text-align: center;">
-                <a href="{{ route('client.reservation.paiement', $reservation->id) }}" class="btn btn-pay">💳 Payer ma réservation</a>
+                <a href="http://127.0.0.1:8000/client/reservations/{{ $reservation->id }}/paiement" class="btn btn-pay">💳 Payer ma réservation</a>
                 <a href="{{ route('client.reservations.show', $reservation->id) }}" class="btn">📋 Voir ma réservation</a>
             </p>
             

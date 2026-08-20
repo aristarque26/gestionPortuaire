@@ -5,7 +5,7 @@
 
 @section('content')
 <div class="bg-white rounded-lg shadow p-6">
-    <form method="POST" action="{{ route('admin.conceder.update', $conceder->id) }}">
+    <form method="POST" action="{{ route('admin.conceder.update', [$conceder->idport, $conceder->idtrajet]) }}">
         @csrf
         @method('PUT')
 

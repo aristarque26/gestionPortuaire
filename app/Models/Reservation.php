@@ -23,15 +23,15 @@ class Reservation extends Model
         'statut',
         'idvoyage',
         'idclient',
-        'idpavillon',  // ✅ AJOUTÉ
-        'prix_total'    // ✅ AJOUTÉ
+        'idpavillon',
+        'prix_total'
     ];
 
     protected $casts = [
         'date_reservation' => 'datetime',
         'date_embarquement' => 'datetime',
         'date_arrivee' => 'datetime',
-        'prix_total' => 'decimal:2' // ✅ AJOUTÉ
+        'prix_total' => 'decimal:2'
     ];
 
     public function voyage()
@@ -49,13 +49,11 @@ class Reservation extends Model
         return $this->hasOne(Paiement::class, 'idreservation');
     }
 
-    // ✅ RELATION DIRECTE avec un seul pavillon (pour la réservation principale)
     public function pavillon()
     {
         return $this->belongsTo(Pavillon::class, 'idpavillon');
     }
 
-    // ✅ GARDE LA RELATION MANY-TO-MANY existante (si tu l’utilises encore ailleurs)
     public function pavillons()
     {
         return $this->belongsToMany(Pavillon::class, 'reserve', 'idreservation', 'idpavillon')

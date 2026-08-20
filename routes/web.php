@@ -180,6 +180,10 @@ Route::middleware('auth')->group(function () {
         Route::get('reservation/{id}/paiement', [ClientReservationController::class, 'pagePaiement'])->name('client.reservation.paiement');
         Route::post('reservation/{id}/paiement/effectuer', [ClientReservationController::class, 'effectuerPaiement'])->name('client.reservation.effectuer.paiement');
         
+        // ✅ AJOUT : Route avec "reservations" (avec un 's') pour correspondre à ton URL
+        Route::get('reservations/{id}/paiement', [ClientReservationController::class, 'pagePaiement'])->name('client.reservations.paiement');
+        Route::post('reservations/{id}/paiement/effectuer', [ClientReservationController::class, 'effectuerPaiement'])->name('client.reservations.effectuer.paiement');
+        
         Route::resource('paiements', ClientPaiementController::class);
         Route::get('/profil', [ProfilController::class, 'show'])->name('profil.show');
         Route::get('/profil/edit', [ProfilController::class, 'edit'])->name('profil.edit');
@@ -192,7 +196,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/settings/theme', [ClientSettingsController::class, 'theme'])->name('settings.theme');
         Route::post('/settings/theme', [ClientSettingsController::class, 'updateTheme'])->name('settings.update.theme');
         
-        // ✅ AJOUT : Routes pour la gestion du mot de passe (CORRIGÉES)
+        // AJOUT : Routes pour la gestion du mot de passe (CORRIGÉES)
         Route::get('/settings/password', [ClientSettingsController::class, 'password'])->name('settings.password');
         Route::post('/settings/password', [ClientSettingsController::class, 'updatePassword'])->name('settings.update.password');
     });

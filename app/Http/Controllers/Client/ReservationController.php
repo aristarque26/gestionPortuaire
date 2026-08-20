@@ -19,7 +19,7 @@ class ReservationController extends Controller
         $reservations = Reservation::where('idclient', $client->id)
             ->with('voyage', 'pavillon')
             ->latest()
-            ->paginate(10); // ✅ CHANGEMENT : pagination au lieu de get()
+            ->paginate(10);
         
         return view('client.reservations.index', compact('reservations'));
     }
@@ -79,6 +79,9 @@ class ReservationController extends Controller
             return back()->with('error', 'Ce bateau est complet pour ce voyage.');
         }
 
+        // 🔍 LOG : avant la création
+        \Log::info('📝 Création d\'une réservation de type ' . $request->type_reservation);
+
         $reservation = Reservation::create([
             'date_reservation'    => now(),
             'type_reservation'    => $request->type_reservation,
@@ -93,12 +96,13 @@ class ReservationController extends Controller
             'prix_total'          => $prixTotal,
         ]);
 
+        \Log::info('✅ Réservation créée avec ID ' . $reservation->id);
+
         // Envoi de l'email de confirmation
         try {
             $htmlContent = view('emails.reservation-confirmation', ['reservation' => $reservation])->render();
             BrevoEmailService::send($client->email, 'Confirmation de votre réservation', $htmlContent);
         } catch (\Exception $e) {
-            // On ne bloque pas la réservation si l'email échoue
             \Log::error('Erreur envoi email: ' . $e->getMessage());
         }
 
@@ -129,7 +133,6 @@ class ReservationController extends Controller
             ->with('success', 'Réservation annulée avec succès.');
     }
 
-    // 🔥 PAGE DE PAIEMENT (Affiche le formulaire)
     public function pagePaiement($id)
     {
         $client = Auth::user()->client;
@@ -140,7 +143,6 @@ class ReservationController extends Controller
         return view('client.paiement.index', compact('reservation'));
     }
 
-    // 🔥 EFFECTUER LE PAIEMENT (Simulation Maisha Pay)
     public function effectuerPaiement($id)
     {
         $client = Auth::user()->client;
@@ -148,12 +150,6 @@ class ReservationController extends Controller
                         ->where('statut', 'confirme')
                         ->findOrFail($id);
         
-        // ======================================================
-        // SIMULATION MAISHA PAY
-        // En production, remplacer ce bloc par un appel API réel
-        // ======================================================
-        
-        // Création de l'enregistrement dans la table paiements
         $paiement = Paiement::create([
             'idreservation'  => $reservation->id,
             'montant'        => $reservation->prix_total,
@@ -163,11 +159,9 @@ class ReservationController extends Controller
             'statut'         => 'paye'
         ]);
         
-        // Mise à jour du statut de la réservation
         $reservation->statut = 'paye';
         $reservation->save();
         
-        // Envoi de l'email de confirmation de paiement (Email 2)
         try {
             $contenu = view('emails.paiement-confirmation', ['reservation' => $reservation])->render();
             BrevoEmailService::send($client->email, 'Paiement reçu - KivuPort', $contenu);

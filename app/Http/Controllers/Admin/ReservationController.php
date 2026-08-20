@@ -65,34 +65,46 @@ class ReservationController extends Controller
 
     public function confirmer($id)
     {
+        // 🔍 LOG : début de la méthode
+        \Log::info('🔍 Méthode confirmer() déclenchée pour la réservation ' . $id);
+
         $reservation = Reservation::findOrFail($id);
-        
+
         // Vérifier que la réservation est bien en attente
         if ($reservation->statut !== 'en_attente') {
+            \Log::warning('⚠️ Réservation ' . $id . ' non en attente (statut: ' . $reservation->statut . ')');
             return redirect()->route('admin.reservations.index')
                 ->with('error', 'Cette réservation ne peut pas être confirmée.');
         }
-        
+
         // Changer le statut
         $reservation->statut = 'confirme';
         $reservation->save();
-        
+
+        \Log::info('✅ Réservation ' . $id . ' confirmée, envoi de l\'email en cours...');
+
         // Envoi de l'email au client (avec template Blade)
         try {
             $client = $reservation->client;
-            
+
             $sujet = "✅ Votre réservation n°{$reservation->id} est confirmée - KivuPort";
-            
+
             // Utilisation du template Blade
             $contenu = view('emails.reservation-confirmation', ['reservation' => $reservation])->render();
-            
+
+            \Log::info('📧 Tentative d\'envoi à ' . $client->email);
+
             \App\Services\BrevoEmailService::send($client->email, $sujet, $contenu);
-            
+
+            \Log::info('✅ Email envoyé avec succès à ' . $client->email);
+
             return redirect()->route('admin.reservations.index')
                 ->with('success', 'Réservation confirmée et email envoyé au client.');
-                
+
         } catch (\Exception $e) {
-            // L'email n'a pas été envoyé mais la réservation est confirmée
+            \Log::error('❌ Erreur lors de l\'envoi de l\'email : ' . $e->getMessage());
+            \Log::error($e->getTraceAsString());
+
             return redirect()->route('admin.reservations.index')
                 ->with('warning', 'Réservation confirmée mais l\'email n\'a pas pu être envoyé.');
         }

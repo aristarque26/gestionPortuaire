@@ -12,6 +12,10 @@ class Conceder extends Model
     protected $table = 'conceder';
     public $timestamps = true;
 
+    // ✅ INDICATION : pas de clé primaire auto-incrémentée (clé composite)
+    protected $primaryKey = null;
+    public $incrementing = false;
+
     protected $fillable = [
         'idport',
         'idtrajet',
