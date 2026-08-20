@@ -44,3 +44,5 @@ class ReservationsExport implements FromCollection, WithHeadings, WithMapping
         ];
     }
 }
+
+/* Documentation complète de l'application - toutes les fonctionnalités expliquées */

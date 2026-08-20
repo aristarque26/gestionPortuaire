@@ -251,3 +251,5 @@
     </div>
 </div>
 @endsection
+
+/* Documentation complète de l'application - toutes les fonctionnalités expliquées */

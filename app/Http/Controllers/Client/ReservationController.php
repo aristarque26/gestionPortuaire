@@ -96,7 +96,7 @@ class ReservationController extends Controller
             'prix_total'          => $prixTotal,
         ]);
 
-        \Log::info('✅ Réservation créée avec ID ' . $reservation->id);
+        \Log::info(' Réservation créée avec ID ' . $reservation->id);
 
         // Envoi de l'email de confirmation
         try {
@@ -153,10 +153,10 @@ class ReservationController extends Controller
         $paiement = Paiement::create([
             'idreservation'  => $reservation->id,
             'montant'        => $reservation->prix_total,
-            'devise'         => 'FC',
+            'devise'         => 'CDF',
             'mode_paiement'  => 'MAISHA_PAY',
             'date_paiement'  => now(),
-            'statut'         => 'paye'
+            'statut'         => 'payer'
         ]);
         
         $reservation->statut = 'paye';

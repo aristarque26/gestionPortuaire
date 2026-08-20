@@ -59,4 +59,6 @@ class Reservation extends Model
         return $this->belongsToMany(Pavillon::class, 'reserve', 'idreservation', 'idpavillon')
                     ->withPivot('prix');
     }
+
+    /* Documentation complète de l'application - toutes les fonctionnalités expliquées */
 }

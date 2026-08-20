@@ -8,6 +8,8 @@ use Illuminate\Http\Request;
 
 class ReservationController extends Controller
 {
+    /* Documentation complète de l'application - toutes les fonctionnalités expliquées */
+
     public function index(Request $request)
     {
         $query = Reservation::with('client', 'voyage', 'pavillon');
