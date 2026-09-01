@@ -377,6 +377,12 @@
                     <span class="link-text ml-3">Administrateurs</span>
                     <span class="tooltip">Administrateurs</span>
                 </a>
+                <a href="{{ route('admin.personnel.index') }}" 
+                   class="nav-link flex items-center px-4 py-3 rounded-xl text-gray-300 hover:text-white @if(request()->routeIs('admin.personnel.*')) active @endif">
+                    <i class="fas fa-user-tie w-5 text-center"></i>
+                    <span class="link-text ml-3">Personnel</span>
+                    <span class="tooltip">Personnel</span>
+                </a>
                 <a href="{{ route('admin.clients.index') }}" 
                    class="nav-link flex items-center px-4 py-3 rounded-xl text-gray-300 hover:text-white @if(request()->routeIs('admin.clients.*')) active @endif">
                     <i class="fas fa-user-friends w-5 text-center"></i>

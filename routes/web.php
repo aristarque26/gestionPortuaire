@@ -24,6 +24,7 @@ use App\Http\Controllers\Client\ProfilController;
 use App\Http\Controllers\Client\VoyageController as ClientVoyageController;
 use App\Http\Controllers\Client\SettingsController as ClientSettingsController;
 use App\Http\Controllers\Auth\GoogleController;
+use App\Http\Controllers\Auth\FacebookController;
 use App\Http\Controllers\FindReservationController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
@@ -31,6 +32,7 @@ use App\Models\Reservation;
 use App\Models\Pavillon;
 use App\Exports\ReservationsExport;
 use Maatwebsite\Excel\Facades\Excel;
+use Laravel\Socialite\Facades\Socialite;
 
 Route::get('/', function () {
     return view('welcome');
@@ -70,6 +72,10 @@ Route::post('/register', [App\Http\Controllers\Auth\RegisteredUserController::cl
 // ========== ROUTES GOOGLE AUTH ==========
 Route::get('/auth/google', [GoogleController::class, 'redirectToGoogle'])->name('auth.google');
 Route::get('/auth/google/callback', [GoogleController::class, 'handleGoogleCallback']);
+
+// ========== ROUTES FACEBOOK AUTH ==========
+Route::get('/auth/facebook/redirect', [FacebookController::class, 'redirectToFacebook'])->name('auth.facebook.redirect');
+Route::get('/auth/facebook/callback', [FacebookController::class, 'handleFacebookCallback'])->name('auth.facebook.callback');
 
 // ========== ROUTES TROUVER DES RÉSERVATIONS ==========
 Route::get('/trouver-reservations', [FindReservationController::class, 'showForm'])->name('find.form');
@@ -167,7 +173,7 @@ Route::middleware('auth')->group(function () {
     });
     
     // ========== DASHBOARD CLIENT ==========
-    Route::middleware('role:personnel')->prefix('client')->name('client.')->group(function () {
+    Route::middleware('role:client')->prefix('client')->name('client.')->group(function () {
         Route::get('/dashboard', [ClientDashboardController::class, 'index'])->name('dashboard');
         Route::get('/voyages', [ClientVoyageController::class, 'index'])->name('voyages.index');
         
@@ -183,6 +189,9 @@ Route::middleware('auth')->group(function () {
         // ✅ AJOUT : Route avec "reservations" (avec un 's') pour correspondre à ton URL
         Route::get('reservations/{id}/paiement', [ClientReservationController::class, 'pagePaiement'])->name('client.reservations.paiement');
         Route::post('reservations/{id}/paiement/effectuer', [ClientReservationController::class, 'effectuerPaiement'])->name('client.reservations.effectuer.paiement');
+        
+        // ✅ AJOUT : Route pour télécharger la facture (PDF)
+        Route::get('reservation/{id}/facture', [ClientReservationController::class, 'telechargerFacture'])->name('client.reservation.facture');
         
         Route::resource('paiements', ClientPaiementController::class);
         Route::get('/profil', [ProfilController::class, 'show'])->name('profil.show');
@@ -200,6 +209,22 @@ Route::middleware('auth')->group(function () {
         Route::get('/settings/password', [ClientSettingsController::class, 'password'])->name('settings.password');
         Route::post('/settings/password', [ClientSettingsController::class, 'updatePassword'])->name('settings.update.password');
     });
+    
+    // ========== DASHBOARD PERSONNEL ==========
+    Route::middleware(['auth', 'role:personnel'])->prefix('personnel')->name('personnel.')->group(function () {
+        Route::get('/dashboard', [App\Http\Controllers\Personnel\DashboardController::class, 'index'])->name('dashboard');
+    });
+
+    // ========== GESTION DU PERSONNEL (ADMIN) ==========
+    Route::middleware(['auth', 'role:admin'])->prefix('admin/personnel')->name('admin.personnel.')->group(function () {
+        Route::get('/', [App\Http\Controllers\Admin\PersonnelController::class, 'index'])->name('index');
+        Route::get('/create', [App\Http\Controllers\Admin\PersonnelController::class, 'create'])->name('create');
+        Route::post('/', [App\Http\Controllers\Admin\PersonnelController::class, 'store'])->name('store');
+        Route::get('/{id}', [App\Http\Controllers\Admin\PersonnelController::class, 'show'])->name('show');
+        Route::get('/{id}/edit', [App\Http\Controllers\Admin\PersonnelController::class, 'edit'])->name('edit');
+        Route::put('/{id}', [App\Http\Controllers\Admin\PersonnelController::class, 'update'])->name('update');
+        Route::delete('/{id}', [App\Http\Controllers\Admin\PersonnelController::class, 'destroy'])->name('destroy');
+    });
 });
 
-require __DIR__.'/auth.php';
+require base_path('routes/auth.php');

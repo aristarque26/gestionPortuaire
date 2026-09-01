@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Confirmation de réservation - KivuPort</title>
+    <title>Paiement reçu - KivuPort</title>
     <style>
         body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
         .container { max-width: 600px; margin: 0 auto; padding: 20px; }
@@ -19,33 +19,25 @@
     <div class="container">
         <div class="header">
             <h1>⚓ KivuPort.com</h1>
-            <p>✅ Votre réservation est confirmée</p>
+            <p>✅ Paiement confirmé</p>
         </div>
         <div class="content">
-            <h2>Bonjour {{ $reservation->client->prenom }} {{ $reservation->client->nom }} !</h2>
-            <p>Votre réservation a été <strong>confirmée par notre équipe</strong>. Voici les détails :</p>
+            <h2>Merci {{ $reservation->client->prenom }} {{ $reservation->client->nom }} !</h2>
+            <p>Nous vous confirmons la réception de votre paiement pour la réservation <strong>n°{{ $reservation->id }}</strong>.</p>
             
             <div class="details">
-                <p><strong>🔖 N° réservation :</strong> #{{ $reservation->id }}</p>
+                <p><strong>💰 Montant réglé :</strong> {{ number_format($reservation->prix_total, 0, ',', ' ') }} FCFA</p>
                 <p><strong>🚢 Voyage :</strong> {{ $reservation->voyage->code_voyage }}</p>
                 <p><strong>📅 Date d'embarquement :</strong> {{ \Carbon\Carbon::parse($reservation->date_embarquement)->format('d/m/Y H:i') }}</p>
-                <p><strong>🏠 Pavillon :</strong> {{ $reservation->pavillon->nom ?? 'N/A' }} ({{ $reservation->pavillon->classe ?? 'N/A' }})</p>
-                <p><strong>💰 Prix total :</strong> {{ number_format($reservation->prix_total, 0, ',', ' ') }} FCFA</p>
-                <p><strong>📌 Statut :</strong> {{ $reservation->statut }}</p>
+                <p><strong>💳 Moyen de paiement :</strong> Maisha Pay</p>
             </div>
             
-            <p style="text-align: center; font-size: 18px; font-weight: bold;">
-                Pour finaliser votre réservation, veuillez procéder au paiement.
-            </p>
-            
+            <p>Vous pouvez télécharger votre facture ci-dessous ou la retrouver en pièce jointe :</p>
             <p style="text-align: center;">
-                <a href="{{ route('client.paiement.direct', ['id' => $reservation->id, 'token' => $reservation->generatePaiementToken()]) }}" class="btn btn-pay">💳 Payer ma réservation</a>
-                <a href="{{ route('client.reservations.show', $reservation->id) }}" class="btn">📋 Voir ma réservation</a>
+                <a href="{{ route('client.reservation.facture', $reservation->id) }}" class="btn">📄 Télécharger la facture</a>
             </p>
             
-            <p>Une fois le paiement validé, vous recevrez votre confirmation définitive.</p>
-            <p>Merci de votre confiance !</p>
-            <p>L'équipe KivuPort.com</p>
+            <p>Bon voyage avec KivuPort.com ! ⚓</p>
         </div>
         <div class="footer">
             <p>© 2025 KivuPort.com - Gestion portuaire</p>

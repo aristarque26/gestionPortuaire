@@ -10,6 +10,8 @@ use App\Models\Paiement;
 use App\Services\BrevoEmailService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
+use Barryvdh\DomPDF\Facade\Pdf;
+use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 class ReservationController extends Controller
 {
@@ -79,7 +81,6 @@ class ReservationController extends Controller
             return back()->with('error', 'Ce bateau est complet pour ce voyage.');
         }
 
-        // 🔍 LOG : avant la création
         \Log::info('📝 Création d\'une réservation de type ' . $request->type_reservation);
 
         $reservation = Reservation::create([
@@ -96,9 +97,8 @@ class ReservationController extends Controller
             'prix_total'          => $prixTotal,
         ]);
 
-        \Log::info(' Réservation créée avec ID ' . $reservation->id);
+        \Log::info('Réservation créée avec ID ' . $reservation->id);
 
-        // Envoi de l'email de confirmation
         try {
             $htmlContent = view('emails.reservation-confirmation', ['reservation' => $reservation])->render();
             BrevoEmailService::send($client->email, 'Confirmation de votre réservation', $htmlContent);
@@ -143,33 +143,75 @@ class ReservationController extends Controller
         return view('client.paiement.index', compact('reservation'));
     }
 
-    public function effectuerPaiement($id)
+public function effectuerPaiement($id)
+{
+    $client = Auth::user()->client;
+    $reservation = Reservation::where('idclient', $client->id)
+                    ->where('statut', 'confirme')
+                    ->findOrFail($id);
+    
+    // Création du paiement
+    $paiement = Paiement::create([
+        'idreservation'  => $reservation->id,
+        'montant'        => $reservation->prix_total,
+        'devise'         => 'CDF',
+        'mode_paiement'  => 'MAISHA_PAY',
+        'date_paiement'  => now(),
+        'statut'         => 'paye'
+    ]);
+    
+    $reservation->statut = 'paye';
+    $reservation->save();
+    
+    // Génération du PDF
+    $pdf = Pdf::loadView('pdf.facture', ['reservation' => $reservation]);
+    $pdfContent = $pdf->output();
+    
+    // ✅ Déclarer $contenu ici (en dehors du try)
+    $contenu = view('emails.paiement-confirmation', ['reservation' => $reservation])->render();
+    
+    try {
+        BrevoEmailService::sendWithAttachment(
+            $client->email,
+            'Paiement reçu - KivuPort',
+            $contenu,
+            $pdfContent,
+            'facture_' . $reservation->id . '.pdf'
+        );
+    } catch (\Exception $e) {
+        \Log::error('Erreur envoi email paiement: ' . $e->getMessage());
+        BrevoEmailService::send($client->email, 'Paiement reçu - KivuPort', $contenu);
+    }
+    
+    return redirect()->route('client.reservations.index')
+        ->with('success', 'Paiement effectué avec succès via Maisha Pay !');
+}
+
+    public function paiementDirect($id, $token)
+    {
+        $reservation = Reservation::findOrFail($id);
+
+        if ($reservation->generatePaiementToken() !== $token) {
+            abort(403, 'Lien de paiement invalide.');
+        }
+
+        if ($reservation->statut !== 'confirme') {
+            abort(404, 'Cette réservation ne peut pas être payée.');
+        }
+
+        Auth::loginUsingId($reservation->idclient);
+
+        return redirect()->route('client.reservations.paiement', ['id' => $reservation->id]);
+    }
+
+    public function telechargerFacture($id)
     {
         $client = Auth::user()->client;
         $reservation = Reservation::where('idclient', $client->id)
-                        ->where('statut', 'confirme')
+                        ->where('statut', 'paye')
                         ->findOrFail($id);
-        
-        $paiement = Paiement::create([
-            'idreservation'  => $reservation->id,
-            'montant'        => $reservation->prix_total,
-            'devise'         => 'CDF',
-            'mode_paiement'  => 'MAISHA_PAY',
-            'date_paiement'  => now(),
-            'statut'         => 'payer'
-        ]);
-        
-        $reservation->statut = 'paye';
-        $reservation->save();
-        
-        try {
-            $contenu = view('emails.paiement-confirmation', ['reservation' => $reservation])->render();
-            BrevoEmailService::send($client->email, 'Paiement reçu - KivuPort', $contenu);
-        } catch (\Exception $e) {
-            \Log::error('Erreur envoi email paiement: ' . $e->getMessage());
-        }
-        
-        return redirect()->route('client.reservations.index')
-            ->with('success', 'Paiement effectué avec succès via Maisha Pay !');
+
+        $pdf = Pdf::loadView('pdf.facture', ['reservation' => $reservation]);
+        return $pdf->download('facture_' . $reservation->id . '.pdf');
     }
 }

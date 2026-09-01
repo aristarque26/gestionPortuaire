@@ -8,27 +8,26 @@ use App\Models\Client;
 use Illuminate\Support\Facades\Auth;
 use Laravel\Socialite\Facades\Socialite;
 
-class GoogleController extends Controller
+class FacebookController extends Controller
 {
-    public function redirectToGoogle()
+    public function redirectToFacebook()
     {
-        return Socialite::driver('google')
-            ->with(['prompt' => 'select_account'])
+        return Socialite::driver('facebook')
             ->redirect();
     }
 
-    public function handleGoogleCallback()
+    public function handleFacebookCallback()
     {
         try {
-            $googleUser = Socialite::driver('google')->user();
-            
-            $user = User::where('email', $googleUser->getEmail())->first();
-            
+            $facebookUser = Socialite::driver('facebook')->user();
+
+            $user = User::where('email', $facebookUser->getEmail())->first();
+
             if (!$user) {
                 $user = User::create([
-                    'name' => $googleUser->getName(),
+                    'name' => $facebookUser->getName(),
                     'prenom' => '',
-                    'email' => $googleUser->getEmail(),
+                    'email' => $facebookUser->getEmail(),
                     'telephone' => '',
                     'password' => bcrypt(uniqid()),
                     'role' => 'client',
@@ -49,17 +48,17 @@ class GoogleController extends Controller
                     'idutilisateur' => $user->id,
                 ]);
             }
-            
+
             Auth::login($user);
-            
+
             if ($user->role === 'admin') {
                 return redirect()->route('admin.dashboard');
             }
-            
+
             return redirect()->route('client.dashboard');
-            
+
         } catch (\Exception $e) {
-            return redirect()->route('login')->with('error', 'Erreur de connexion avec Google.');
+            return redirect()->route('login')->with('error', 'Erreur de connexion avec Facebook.');
         }
     }
 }

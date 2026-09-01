@@ -32,10 +32,26 @@ class User extends Authenticatable
         'statut' => 'string'
     ];
     
-    // Méthodes pour les rôles
+    // ========== RELATIONS ==========
+    public function client()
+    {
+        return $this->hasOne(Client::class, 'idutilisateur');
+    }
+
+    public function personnel()
+    {
+        return $this->hasOne(Personnel::class);
+    }
+    
+    // ========== MÉTHODES RÔLES ==========
     public function isAdmin()
     {
         return $this->role === 'admin';
+    }
+    
+    public function isClient()
+    {
+        return $this->role === 'client';
     }
     
     public function isPersonnel()
@@ -43,13 +59,22 @@ class User extends Authenticatable
         return $this->role === 'personnel';
     }
     
-    // Nom complet
-    public function getNomCompletAttribute()
+    public function getRoleLabelAttribute()
     {
-        return $this->prenom . ' ' . $this->name;
+        return match($this->role) {
+            'admin' => 'Administrateur',
+            'client' => 'Client',
+            'personnel' => 'Agent portuaire',
+            default => 'Inconnu'
+        };
     }
     
-    // Accesseur pour l'URL de la photo
+    // ========== ACCESSOIRES ==========
+    public function getNomCompletAttribute()
+    {
+        return trim($this->prenom . ' ' . $this->name);
+    }
+    
     public function getPhotoUrlAttribute()
     {
         if ($this->photo) {
@@ -57,8 +82,4 @@ class User extends Authenticatable
         }
         return null;
     }
-    public function client()
-{
-    return $this->hasOne(Client::class, 'idutilisateur');
-}
 }

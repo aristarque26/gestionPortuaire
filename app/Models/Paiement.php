@@ -25,6 +25,9 @@ class Paiement extends Model
         'date_paiement' => 'datetime'
     ];
 
+    // ✅ Statuts autorisés pour la colonne 'statut'
+    const STATUTS = ['paye', 'en_attente', 'echoue', 'rembourse'];
+
     public function reservation()
     {
         return $this->belongsTo(Reservation::class, 'idreservation');

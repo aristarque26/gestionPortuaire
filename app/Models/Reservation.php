@@ -60,5 +60,12 @@ class Reservation extends Model
                     ->withPivot('prix');
     }
 
+    /**
+ * Générer un token unique pour le paiement direct
+ */
+    public function generatePaiementToken()
+    {
+        return hash_hmac('sha256', $this->id . $this->idclient . $this->created_at, config('app.key'));
+    }
     /* Documentation complète de l'application - toutes les fonctionnalités expliquées */
 }
