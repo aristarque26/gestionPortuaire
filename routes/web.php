@@ -210,7 +210,7 @@ Route::middleware('auth')->group(function () {
         Route::post('/settings/password', [ClientSettingsController::class, 'updatePassword'])->name('settings.update.password');
     });
     
-    // ========== DASHBOARD PERSONNEL ==========
+    // ========== DASHBOARD PERSONNEL (Générique - Fallback) ==========
     Route::middleware(['auth', 'role:personnel'])->prefix('personnel')->name('personnel.')->group(function () {
         Route::get('/dashboard', [App\Http\Controllers\Personnel\DashboardController::class, 'index'])->name('dashboard');
     });
@@ -225,6 +225,271 @@ Route::middleware('auth')->group(function () {
         Route::put('/{id}', [App\Http\Controllers\Admin\PersonnelController::class, 'update'])->name('update');
         Route::delete('/{id}', [App\Http\Controllers\Admin\PersonnelController::class, 'destroy'])->name('destroy');
     });
+
+    // ================================================================
+    // ========== 🚢 DASHBOARD SUPERVISEUR ==========
+    // ================================================================
+    Route::middleware(['auth', 'role:personnel,superviseur'])
+         ->prefix('superviseur')
+         ->name('superviseur.')
+         ->group(function () {
+             
+        // ===== DASHBOARD =====
+        Route::get('/dashboard', [App\Http\Controllers\Superviseur\DashboardController::class, 'index'])
+             ->name('dashboard');
+
+        // ===== RÉSERVATIONS =====
+        Route::prefix('reservations')->name('reservations.')->group(function () {
+            Route::get('/', [App\Http\Controllers\Superviseur\ReservationController::class, 'index'])
+                 ->name('index');
+            Route::get('/export', [App\Http\Controllers\Superviseur\ReservationController::class, 'export'])
+                 ->name('export');
+            Route::get('/{id}', [App\Http\Controllers\Superviseur\ReservationController::class, 'show'])
+                 ->name('show');
+            Route::put('/{id}/confirmer', [App\Http\Controllers\Superviseur\ReservationController::class, 'confirmer'])
+                 ->name('confirmer');
+            Route::put('/{id}/annuler', [App\Http\Controllers\Superviseur\ReservationController::class, 'annuler'])
+                 ->name('annuler');
+            Route::put('/{id}/marquer-paye', [App\Http\Controllers\Superviseur\ReservationController::class, 'marquerPayee'])
+                 ->name('marquer.paye');
+            Route::put('/{id}/marquer-arrivee', [App\Http\Controllers\Superviseur\ReservationController::class, 'marquerArrivee'])
+                 ->name('marquer.arrivee');
+        });
+
+        // ===== PERSONNEL (RH) =====
+        Route::prefix('personnel')->name('personnel.')->group(function () {
+            Route::get('/', [App\Http\Controllers\Superviseur\PersonnelController::class, 'index'])
+                 ->name('index');
+            Route::get('/export', [App\Http\Controllers\Superviseur\PersonnelController::class, 'export'])
+                 ->name('export');
+            Route::get('/{id}', [App\Http\Controllers\Superviseur\PersonnelController::class, 'show'])
+                 ->name('show');
+            Route::get('/{id}/edit', [App\Http\Controllers\Superviseur\PersonnelController::class, 'edit'])
+                 ->name('edit');
+            Route::put('/{id}', [App\Http\Controllers\Superviseur\PersonnelController::class, 'update'])
+                 ->name('update');
+            Route::put('/{id}/activer', [App\Http\Controllers\Superviseur\PersonnelController::class, 'activer'])
+                 ->name('activer');
+            Route::put('/{id}/desactiver', [App\Http\Controllers\Superviseur\PersonnelController::class, 'desactiver'])
+                 ->name('desactiver');
+        });
+
+        // ===== QUAIS =====
+        Route::prefix('quais')->name('quais.')->group(function () {
+            Route::get('/', [App\Http\Controllers\Superviseur\QuaiController::class, 'index'])
+                 ->name('index');
+            Route::get('/export', [App\Http\Controllers\Superviseur\QuaiController::class, 'export'])
+                 ->name('export');
+            Route::get('/{id}', [App\Http\Controllers\Superviseur\QuaiController::class, 'show'])
+                 ->name('show');
+            Route::get('/{id}/bateaux', [App\Http\Controllers\Superviseur\QuaiController::class, 'bateaux'])
+                 ->name('bateaux');
+            Route::put('/{id}/statut', [App\Http\Controllers\Superviseur\QuaiController::class, 'updateStatut'])
+                 ->name('statut');
+            Route::put('/{id}/liberer', [App\Http\Controllers\Superviseur\QuaiController::class, 'liberer'])
+                 ->name('liberer');
+        });
+
+        // ===== VOYAGES =====
+        Route::prefix('voyages')->name('voyages.')->group(function () {
+            Route::get('/', [App\Http\Controllers\Superviseur\VoyageController::class, 'index'])
+                 ->name('index');
+            Route::get('/export', [App\Http\Controllers\Superviseur\VoyageController::class, 'export'])
+                 ->name('export');
+            Route::get('/{id}', [App\Http\Controllers\Superviseur\VoyageController::class, 'show'])
+                 ->name('show');
+            Route::get('/{id}/reservations', [App\Http\Controllers\Superviseur\VoyageController::class, 'reservations'])
+                 ->name('reservations');
+            Route::get('/{id}/trajets', [App\Http\Controllers\Superviseur\VoyageController::class, 'trajets'])
+                 ->name('trajets');
+        });
+
+        // ===== BATEAUX =====
+        Route::prefix('bateaux')->name('bateaux.')->group(function () {
+            Route::get('/', [App\Http\Controllers\Superviseur\BateauController::class, 'index'])
+                 ->name('index');
+            Route::get('/export', [App\Http\Controllers\Superviseur\BateauController::class, 'export'])
+                 ->name('export');
+            Route::get('/{id}', [App\Http\Controllers\Superviseur\BateauController::class, 'show'])
+                 ->name('show');
+            Route::get('/{id}/pavillons', [App\Http\Controllers\Superviseur\BateauController::class, 'pavillons'])
+                 ->name('pavillons');
+            Route::get('/{id}/historique', [App\Http\Controllers\Superviseur\BateauController::class, 'historiqueVoyages'])
+                 ->name('historique');
+        });
+
+        // ===== STATISTIQUES =====
+        Route::prefix('statistiques')->name('statistiques.')->group(function () {
+            Route::get('/', [App\Http\Controllers\Superviseur\StatistiqueController::class, 'index'])
+                 ->name('index');
+            Route::get('/financieres', [App\Http\Controllers\Superviseur\StatistiqueController::class, 'financieres'])
+                 ->name('financieres');
+            Route::get('/reservations', [App\Http\Controllers\Superviseur\StatistiqueController::class, 'reservations'])
+                 ->name('reservations');
+            Route::get('/personnel', [App\Http\Controllers\Superviseur\StatistiqueController::class, 'personnel'])
+                 ->name('personnel');
+            Route::get('/export/{type}', [App\Http\Controllers\Superviseur\StatistiqueController::class, 'export'])
+                 ->name('export');
+        });
+
+        // ===== RAPPORTS =====
+        Route::prefix('rapports')->name('rapports.')->group(function () {
+            Route::get('/', [App\Http\Controllers\Superviseur\RapportController::class, 'index'])
+                 ->name('index');
+            Route::post('/generer', [App\Http\Controllers\Superviseur\RapportController::class, 'generer'])
+                 ->name('generer');
+        });
+    });
+    
+    // ========== FIN ROUTES SUPERVISEUR ==========
+    
+
+    // ========== 🧑‍💼 ROUTES PERSONNEL (PAR RÔLE) ==========   
+    // ===== 1. AGENT PORTUAIRE =====
+    Route::middleware(['auth', 'role:personnel,agent_portuaire'])
+         ->prefix('agent')->name('agent.')->group(function () {
+             
+        // Dashboard
+        Route::get('/dashboard', [App\Http\Controllers\Personnel\AgentController::class, 'dashboard'])
+             ->name('dashboard');
+        
+        // Réservations
+        Route::prefix('reservations')->name('reservations.')->group(function () {
+            Route::get('/', [App\Http\Controllers\Personnel\AgentController::class, 'reservations'])
+                 ->name('index');
+            Route::get('/export', [App\Http\Controllers\Personnel\AgentController::class, 'exportReservations'])
+                 ->name('export');
+            Route::get('/{id}', [App\Http\Controllers\Personnel\AgentController::class, 'showReservation'])
+                 ->name('show');
+            Route::put('/{id}/confirmer', [App\Http\Controllers\Personnel\AgentController::class, 'confirmerReservation'])
+                 ->name('confirmer');
+            Route::put('/{id}/annuler', [App\Http\Controllers\Personnel\AgentController::class, 'annulerReservation'])
+                 ->name('annuler');
+            Route::put('/{id}/marquer-paye', [App\Http\Controllers\Personnel\AgentController::class, 'marquerPayee'])
+                 ->name('marquer.paye');
+            Route::put('/{id}/marquer-arrivee', [App\Http\Controllers\Personnel\AgentController::class, 'marquerArrivee'])
+                 ->name('marquer.arrivee');
+        });
+    });
+
+    // ===== 2. COMPTABLE =====
+    Route::middleware(['auth', 'role:personnel,comptable'])
+         ->prefix('comptable')->name('comptable.')->group(function () {
+             
+        // Dashboard
+        Route::get('/dashboard', [App\Http\Controllers\Personnel\ComptableController::class, 'dashboard'])
+             ->name('dashboard');
+        
+        // Paiements
+        Route::prefix('paiements')->name('paiements.')->group(function () {
+            Route::get('/', [App\Http\Controllers\Personnel\ComptableController::class, 'paiements'])
+                 ->name('index');
+            Route::get('/export', [App\Http\Controllers\Personnel\ComptableController::class, 'exportPaiements'])
+                 ->name('export');
+            Route::get('/{id}', [App\Http\Controllers\Personnel\ComptableController::class, 'showPaiement'])
+                 ->name('show');
+            Route::put('/{id}/valider', [App\Http\Controllers\Personnel\ComptableController::class, 'validerPaiement'])
+                 ->name('valider');
+            Route::put('/{id}/refuser', [App\Http\Controllers\Personnel\ComptableController::class, 'refuserPaiement'])
+                 ->name('refuser');
+        });
+
+        // Rapport financier
+        Route::get('/rapport-financier', [App\Http\Controllers\Personnel\ComptableController::class, 'rapportFinancier'])
+             ->name('rapport.financier');
+    });
+
+    // ===== 3. CAISSIER =====
+    Route::middleware(['auth', 'role:personnel,caissier'])
+         ->prefix('caissier')->name('caissier.')->group(function () {
+             
+        // Dashboard
+        Route::get('/dashboard', [App\Http\Controllers\Personnel\CaissierController::class, 'dashboard'])
+             ->name('dashboard');
+        
+        // Paiements en attente
+        Route::get('/paiements-attente', [App\Http\Controllers\Personnel\CaissierController::class, 'paiementsAttente'])
+             ->name('paiements.attente');
+        
+        // Encaisser
+        Route::put('/paiements/{id}/encaisser', [App\Http\Controllers\Personnel\CaissierController::class, 'encaisserPaiement'])
+             ->name('paiements.encaisser');
+        
+        // Encaisser multiple
+        Route::post('/paiements/encaisser-multiple', [App\Http\Controllers\Personnel\CaissierController::class, 'encaisserMultiple'])
+             ->name('paiements.encaisser.multiple');
+        
+        // Historique
+        Route::get('/historique', [App\Http\Controllers\Personnel\CaissierController::class, 'historique'])
+             ->name('historique');
+        
+        // Export
+        Route::get('/export', [App\Http\Controllers\Personnel\CaissierController::class, 'exportPaiements'])
+             ->name('export');
+        
+        // Statistiques
+        Route::get('/statistiques', [App\Http\Controllers\Personnel\CaissierController::class, 'statistiques'])
+             ->name('statistiques');
+    });
+
+    // ===== 4. GESTIONNAIRE =====
+    Route::middleware(['auth', 'role:personnel,gestionnaire'])
+         ->prefix('gestionnaire')->name('gestionnaire.')->group(function () {
+             
+        // Dashboard
+        Route::get('/dashboard', [App\Http\Controllers\Personnel\GestionnaireController::class, 'dashboard'])
+             ->name('dashboard');
+        
+        // Voyages
+        Route::prefix('voyages')->name('voyages.')->group(function () {
+            Route::get('/', [App\Http\Controllers\Personnel\GestionnaireController::class, 'voyages'])
+                 ->name('index');
+            Route::get('/create', [App\Http\Controllers\Personnel\GestionnaireController::class, 'createVoyage'])
+                 ->name('create');
+            Route::post('/', [App\Http\Controllers\Personnel\GestionnaireController::class, 'storeVoyage'])
+                 ->name('store');
+            Route::get('/export', [App\Http\Controllers\Personnel\GestionnaireController::class, 'exportVoyages'])
+                 ->name('export');
+            Route::get('/{id}', [App\Http\Controllers\Personnel\GestionnaireController::class, 'showVoyage'])
+                 ->name('show');
+            Route::get('/{id}/edit', [App\Http\Controllers\Personnel\GestionnaireController::class, 'editVoyage'])
+                 ->name('edit');
+            Route::put('/{id}', [App\Http\Controllers\Personnel\GestionnaireController::class, 'updateVoyage'])
+                 ->name('update');
+            Route::delete('/{id}', [App\Http\Controllers\Personnel\GestionnaireController::class, 'deleteVoyage'])
+                 ->name('delete');
+        });
+
+        // Bateaux
+        Route::prefix('bateaux')->name('bateaux.')->group(function () {
+            Route::get('/', [App\Http\Controllers\Personnel\GestionnaireController::class, 'bateaux'])
+                 ->name('index');
+            Route::get('/create', [App\Http\Controllers\Personnel\GestionnaireController::class, 'createBateau'])
+                 ->name('create');
+            Route::post('/', [App\Http\Controllers\Personnel\GestionnaireController::class, 'storeBateau'])
+                 ->name('store');
+            Route::get('/{id}', [App\Http\Controllers\Personnel\GestionnaireController::class, 'showBateau'])
+                 ->name('show');
+            Route::get('/{id}/edit', [App\Http\Controllers\Personnel\GestionnaireController::class, 'editBateau'])
+                 ->name('edit');
+            Route::put('/{id}', [App\Http\Controllers\Personnel\GestionnaireController::class, 'updateBateau'])
+                 ->name('update');
+            Route::delete('/{id}', [App\Http\Controllers\Personnel\GestionnaireController::class, 'deleteBateau'])
+                 ->name('delete');
+        });
+
+        // Ports
+        Route::get('/ports', [App\Http\Controllers\Personnel\GestionnaireController::class, 'ports'])
+             ->name('ports');
+
+        // Quais
+        Route::get('/quais', [App\Http\Controllers\Personnel\GestionnaireController::class, 'quais'])
+             ->name('quais');
+    });
+    // ================================================================
+    // ========== FIN ROUTES PERSONNEL ==========
+    // ================================================================
+
 });
 
 require base_path('routes/auth.php');

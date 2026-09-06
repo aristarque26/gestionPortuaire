@@ -31,9 +31,45 @@ class AuthenticatedSessionController extends Controller
         // Redirection selon le rôle
         $user = Auth::user();
         
+        // ✅ ADMIN → dashboard admin
         if ($user->isAdmin()) {
             return redirect()->route('admin.dashboard');
-        } elseif ($user->isPersonnel()) {
+        }
+        
+        // ✅ CLIENT → dashboard client
+        if ($user->role === 'client') {
+            return redirect()->route('client.dashboard');
+        }
+
+        // ✅ PERSONNEL → redirection selon personnel_role
+        if ($user->isPersonnel()) {
+            // Charger la relation personnel
+            $user->load('personnel');
+            
+            if ($user->personnel) {
+                $role = $user->personnel->personnel_role;
+                
+                switch ($role) {
+                    case 'superviseur':
+                        return redirect()->route('superviseur.dashboard');
+                        break;
+                    case 'comptable':
+                        return redirect()->route('comptable.dashboard');
+                        break;
+                    case 'caissier':
+                        return redirect()->route('caissier.dashboard');
+                        break;
+                    case 'gestionnaire':
+                        return redirect()->route('gestionnaire.dashboard');
+                        break;
+                    case 'agent_portuaire':
+                    default:
+                        return redirect()->route('agent.dashboard');
+                        break;
+                }
+            }
+            
+            // Fallback si la relation personnel n'existe pas
             return redirect()->route('personnel.dashboard');
         }
         
